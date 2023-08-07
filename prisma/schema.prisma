@@ -1,0 +1,74 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
+}
+
+enum TaskPriority {
+    LOW
+    MEDIUM
+    HIGH
+}
+
+enum TaskStatus {
+    BACKLOG
+    TODO
+    IN_PROGRESS
+    IN_REVIEW
+    DONE
+    CANCELED
+}
+
+model User {
+    id    Int    @id @default(autoincrement())
+    name  String
+    tasks Task[]
+}
+
+model Tag {
+    id          Int           @id @default(autoincrement())
+    name        String
+    tagsOnTasks TagsOnTasks[]
+}
+
+model TagsOnTasks {
+    id Int @id @default(autoincrement())
+
+    tag   Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+    tagId Int
+
+    task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    taskId Int
+
+    @@index([tagId])
+    @@index([taskId])
+}
+
+model Project {
+    id    Int    @id @default(autoincrement())
+    name  String
+    tasks Task[]
+}
+
+model Task {
+   id Int @id @default(autoincrement())
+
+   name        String        @default("")
+   description String        @default("") @db.Text
+   status      TaskStatus    @default(BACKLOG)
+   assignee    User?         @relation(fields: [assigneeId], references: [id])
+   assigneeId  Int?
+   priority    TaskPriority  @default(LOW)
+   tagsOnTasks TagsOnTasks[]
+   dueDate     DateTime?
+
+   project   Project? @relation(fields: [projectId], references: [id])
+   projectId Int?
+
+   @@index([projectId])
+   @@index([assigneeId])
+}

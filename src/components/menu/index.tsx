@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useActive, useCommands } from "@remirror/react";
 import IconButton from "@/components/iconButton";
 import MainButton from "@/components/mainButton";
@@ -25,7 +26,15 @@ import Cloud from "/public/icons/cloud.svg";
 import Performance from "/public/icons/performance.svg";
 import Stars from "/public/icons/stars.svg";
 
-const Menu = () => {
+import { status, priority } from "@/utils/options";
+import { trpc } from "@/utils/trpc";
+import { Option } from "@/utils/interfaces";
+
+interface MenuProps {
+  submitHandler: any;
+  recommendation: { projectName: string | null; tags: Array<string> };
+}
+const Menu = ({ submitHandler, recommendation }: MenuProps) => {
   const {
     toggleBold,
     toggleHeading,
@@ -41,12 +50,19 @@ const Menu = () => {
   } = useCommands();
   const active = useActive();
 
-  const options = [
-    { value: "option1", label: "Option 1" },
-    { value: "option2", label: "Option 2" },
-    { value: "option3", label: "Option 3" },
-    { value: "option4", label: "Option 4" },
-  ];
+  const [data, setData] = useState<{
+    users: Array<Option>;
+    projects: Array<Option>;
+    tags: Array<Option>;
+  } | null>(null);
+
+  const usersList = trpc.userList.useQuery().data!;
+  const tagsList = trpc.tagList.useQuery().data!;
+  const projectsList = trpc.projectList.useQuery().data!;
+
+  useEffect(() => {
+    setData({ users: usersList, projects: projectsList, tags: tagsList });
+  }, [usersList, tagsList, projectsList]);
 
   const getStyle = (active: boolean) => {
     return {
@@ -55,51 +71,103 @@ const Menu = () => {
     };
   };
 
+  const selectProject = () => {
+    if (project?.name === recommendation.projectName) {
+      setProject(undefined);
+    } else {
+      const existingProject = projectsList.find(
+        (pr) => pr.name === recommendation.projectName
+      );
+      if (existingProject) {
+        setProject(existingProject);
+      }
+    }
+  };
+  const selectTag = (name: string) => {
+    if (!tags.length) {
+      const newTag = tagsList.find((tag) => tag.name === name);
+    }
+    const recommendedTag = tags.find((tag) => tag.name === name);
+    if (recommendedTag) {
+      setTags(tags.filter((tag) => tag.name !== name));
+    } else {
+      const tag = tagsList.find((tag) => tag.name === name);
+      if (tag) {
+        setTags([tag, ...tags]);
+      }
+    }
+  };
+  const [statusValue, setStatus] = useState<Option>();
+  const [priorityValue, setPriority] = useState<Option>();
+  const [assignee, setAssignee] = useState<Array<Option>>();
+  const [project, setProject] = useState<Option>();
+  const [tags, setTags] = useState<Array<Option>>([]);
+
   return (
     <div className="flex flex-col w-full mt-[24px]">
-      <div className="flex gap-2 pb-3 pl-6">
-        <Image src={Stars} alt="stars" height={20} width={20} />
-        <IconButton iconSrc={Cloud} text="Cloud" />
-        <IconButton iconSrc={Performance} text="Performance" />
-      </div>
-      <div className="flex gap-2 pb-[18px] pl-6">
+      {(recommendation?.projectName || !!recommendation?.tags.length) && (
+        <div className="flex gap-2 pb-3 pl-6 flex-container">
+          <Image src={Stars} alt="stars" height={20} width={20} />
+          {recommendation?.projectName && (
+            <IconButton
+              iconSrc={Cloud}
+              text={recommendation.projectName}
+              borderType="dashed"
+              onClick={selectProject}
+            />
+          )}
+          {recommendation.tags?.map((tag) => (
+            <IconButton
+              key={tag}
+              iconSrc={Performance}
+              text={tag}
+              borderType="dashed"
+              onClick={() => selectTag(tag)}
+            />
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2 pb-[17px] pl-6">
         <IconButton
           iconSrc={Todo}
           text="Todo"
-          options={options}
-          borderType="solid"
+          options={status}
+          setOptionValue={setStatus}
+          size={14}
         />
         <IconButton
           iconSrc={Assignee}
           text="Assignee"
-          options={options}
-          borderType="solid"
+          options={data?.users || []}
           multiSelect
+          setOptionValue={setAssignee}
         />
         <IconButton
           iconSrc={Priority}
           text="Priority"
-          options={options}
-          borderType="solid"
+          options={priority}
+          setOptionValue={setPriority}
         />
         <IconButton
           iconSrc={Tags}
-          text="Tags"
-          options={options}
+          text={tags.length ? tags.map((tag) => tag?.name).join(", ") : "Tags"}
+          options={data?.tags || []}
           multiSelect
-          borderType="solid"
+          setOptionValue={setTags}
+          selected={tags.length ? tags.map((tag) => tag?.id) : []}
         />
         <IconButton
           iconSrc={Project}
           text="Project"
-          options={options}
-          borderType="solid"
+          options={data?.projects || []}
+          setOptionValue={setProject}
+          selected={project?.id ? [project.id] : []}
         />
         <IconButton iconSrc={Calendar} text="Due Date" borderType="solid" />
       </div>
       <hr className="border-[rgba(223, 225, 228, 0.60)]" />
-      <div className="flex items-center	justify-between pl-6 pr-4">
-        <div className="flex gap-3 py-6 w-full">
+      <div className="flex items-center	justify-between pl-6 pr-4 h-[65px]">
+        <div className="flex gap-[11px] py-6">
           <EmojiPopupComponent />
           <button>
             <Image src={ClipIcon} alt="clip" width={18} height={18} />
@@ -156,7 +224,7 @@ const Menu = () => {
             style={getStyle(active.link())}
             onClick={() => {
               if (!active.link()) {
-                const href = prompt("Insert link:");
+                const href = prompt("Insert link:") || "";
                 updateLink({ href });
                 focus();
               } else {
@@ -199,7 +267,11 @@ const Menu = () => {
             />
           </button>
         </div>
-        <MainButton />
+        <MainButton
+          onClick={() =>
+            submitHandler(tags, assignee, project, priorityValue, statusValue)
+          }
+        />
       </div>
     </div>
   );

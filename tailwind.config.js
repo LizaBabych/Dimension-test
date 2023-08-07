@@ -15,6 +15,7 @@ module.exports = {
       width: {
         718: "718px",
         106: "106px",
+        input: "calc(100% - 24px)",
       },
       height: {
         271: "271px",
