@@ -81,11 +81,13 @@ const Editor = ({ title }: EditorProps) => {
     }
   };
 
-  const debouncedSearchChange = useDebounce(description, 2000);
+  const debouncedSearchChange = useDebounce(state.doc, 2000);
 
   useEffect(() => {
-    if (title && description !== "<p></p>") {
+    const htmlStr = prosemirrorNodeToHtml(state.doc);
+    if (title && description !== "<p></p>" && htmlStr !== description) {
       mutation.mutate({ title, description });
+      setDescription(htmlStr);
     }
   }, [debouncedSearchChange]);
 
@@ -127,10 +129,6 @@ const Editor = ({ title }: EditorProps) => {
           autoRender="end"
           onChange={(e) => {
             setState(e.state);
-            const htmlStr = prosemirrorNodeToHtml(state.doc);
-            if (htmlStr !== description) {
-              setDescription(htmlStr);
-            }
           }}
         >
           <Toolbar>
