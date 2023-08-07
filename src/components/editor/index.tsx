@@ -68,7 +68,7 @@ const Editor = ({ title }: EditorProps) => {
     priority: { name: string },
     status: { name: string }
   ) => {
-    if (description && title) {
+    if (description && title && status && assigneeId && projectId && priority) {
       taskMutation.mutate({
         name: title,
         description,

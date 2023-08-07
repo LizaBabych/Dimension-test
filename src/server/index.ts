@@ -36,7 +36,7 @@ export const appRouter = router({
     )
     .mutation(async (opts) => {
       const { input } = opts;
-      const tags = input.tagsOnTasks.map((tag) => ({
+      const tags = input.tagsOnTasks?.map((tag) => ({
         tag: { connect: { id: tag } },
       }));
       try {
