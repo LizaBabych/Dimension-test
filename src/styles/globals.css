@@ -69,7 +69,6 @@ input, input::placeholder, #placeholder {
 .MuiStack-root {
   background-color: transparent !important;
   overflow-x: unset !important;
-  margin-top: 24px !important;
 }
 
 .remirror-floating-popover {
