@@ -76,8 +76,8 @@ input, input::placeholder, #placeholder {
 }
 
 .remirror-emoji-popup-item {
-  max-width: 100%;
-  width: 100%;
+  max-width: 100% !important;
+  width: 100% !important;
   display: flex;
   justify-content: flex-start;
 }
