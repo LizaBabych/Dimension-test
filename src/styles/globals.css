@@ -69,6 +69,18 @@ input, input::placeholder, #placeholder {
 .MuiStack-root {
   background-color: transparent !important;
   overflow-x: unset !important;
+  margin-top: 24px !important;
+}
+
+.remirror-floating-popover {
+  z-index: 1;
+}
+
+.remirror-emoji-popup-item {
+  max-width: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .remirror-theme .ProseMirror {
@@ -118,6 +130,23 @@ ol {
   margin-left: 1em;
   padding-left: 1em;
 }
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.logger {
+  animation: fadeInOut 2s infinite;
+}
+
 @keyframes scaleInAndOut {
   0% {
     opacity: 0;

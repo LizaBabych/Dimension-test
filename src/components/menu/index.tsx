@@ -33,8 +33,9 @@ import { Option } from "@/utils/interfaces";
 interface MenuProps {
   submitHandler: any;
   recommendation: { projectName: string | null; tags: Array<string> };
+  statusFetching: string;
 }
-const Menu = ({ submitHandler, recommendation }: MenuProps) => {
+const Menu = ({ submitHandler, recommendation, statusFetching }: MenuProps) => {
   const {
     toggleBold,
     toggleHeading,
@@ -84,9 +85,6 @@ const Menu = ({ submitHandler, recommendation }: MenuProps) => {
     }
   };
   const selectTag = (name: string) => {
-    if (!tags.length) {
-      const newTag = tagsList.find((tag) => tag.name === name);
-    }
     const recommendedTag = tags.find((tag) => tag.name === name);
     if (recommendedTag) {
       setTags(tags.filter((tag) => tag.name !== name));
@@ -105,15 +103,27 @@ const Menu = ({ submitHandler, recommendation }: MenuProps) => {
 
   return (
     <div className="flex flex-col w-full mt-[24px]">
-      {(recommendation?.projectName || !!recommendation?.tags.length) && (
+      {(recommendation?.projectName ||
+        !!recommendation?.tags.length ||
+        statusFetching === "loading") && (
         <div className="flex gap-2 pb-3 pl-6 flex-container">
           <Image src={Stars} alt="stars" height={20} width={20} />
+          {statusFetching === "loading" && (
+            <IconButton
+              iconSrc={Performance}
+              text="Loading..."
+              borderType="dashed"
+              fullWidth
+              className="logger"
+            />
+          )}
           {recommendation?.projectName && (
             <IconButton
               iconSrc={Cloud}
               text={recommendation.projectName}
               borderType="dashed"
               onClick={selectProject}
+              fullWidth
             />
           )}
           {recommendation.tags?.map((tag) => (
@@ -123,6 +133,7 @@ const Menu = ({ submitHandler, recommendation }: MenuProps) => {
               text={tag}
               borderType="dashed"
               onClick={() => selectTag(tag)}
+              fullWidth
             />
           ))}
         </div>

@@ -111,6 +111,12 @@ const Editor = ({ title }: EditorProps) => {
     }
   }, [mutation.data, projectsList, tagsList]);
 
+  useEffect(() => {
+    if (mutation.status === "loading") {
+      setRecommendation({ projectName: null, tags: [] });
+    }
+  }, [mutation.status]);
+
   return (
     <AllStyledComponent>
       <ThemeProvider>
@@ -129,6 +135,7 @@ const Editor = ({ title }: EditorProps) => {
             <Menu
               submitHandler={submitHandler}
               recommendation={recommendation}
+              statusFetching={mutation.status}
             />
           </Toolbar>
         </Remirror>

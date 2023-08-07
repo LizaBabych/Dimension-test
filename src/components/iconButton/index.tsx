@@ -18,6 +18,8 @@ interface IconButtonProps {
   onClick?: () => void;
   selected?: Array<number>;
   size?: number;
+  fullWidth?: boolean;
+  className?: string;
 }
 
 const IconButton = ({
@@ -30,6 +32,8 @@ const IconButton = ({
   selected,
   onClick,
   size = 16,
+  fullWidth = false,
+  className,
 }: IconButtonProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -98,7 +102,9 @@ const IconButton = ({
     <div className="relative" ref={containerRef}>
       <button
         style={{ borderStyle: borderType }}
-        className="max-w-[110px] rounded-lg border-[#DFE1E4] border h-[30px] px-[11px] flex gap-2 py-1.5 justify-center items-center font-medium tracking-2 text-commonGrey"
+        className={`${
+          !fullWidth && "max-w-[110px]"
+        } ${className} rounded-lg border-[#DFE1E4] border h-[30px] px-[11px] flex gap-2 py-1.5 justify-center items-center font-medium tracking-2 text-commonGrey`}
         onClick={() => {
           if (onClick) onClick();
           setIsOpen((prevState) => !prevState);
