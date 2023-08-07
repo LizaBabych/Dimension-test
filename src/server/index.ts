@@ -28,14 +28,15 @@ export const appRouter = router({
           "DONE",
           "CANCELED",
         ]),
-        assigneeId: z.number(),
+        assigneeId: z.number().optional(),
         priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
-        projectId: z.number(),
-        tagsOnTasks: z.array(z.number()),
+        projectId: z.number().optional(),
+        tagsOnTasks: z.array(z.number()).optional(),
       })
     )
     .mutation(async (opts) => {
       const { input } = opts;
+
       const tags = input.tagsOnTasks?.map((tag) => ({
         tag: { connect: { id: tag } },
       }));
@@ -44,7 +45,7 @@ export const appRouter = router({
           data: {
             ...input,
             // @ts-ignore
-            tagsOnTasks: tags,
+            tagsOnTasks: tags?.length ? tags : {},
           },
         });
       } catch (e) {
